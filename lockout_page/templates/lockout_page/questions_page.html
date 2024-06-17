@@ -1,0 +1,22 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<h1>
+    HI you are in lockouts all the best
+</h1>
+
+<h3>
+    Note:You can claim a problem only if your latest submission before claiming on Codeforces is of that problem. 
+</h3>
+
+{% for prob in selprobs %}
+<div>
+    <p>
+        <a target="_blank" rel="noopener" href="https://codeforces.com/problemset/problem/{{prob.contestId}}/{{prob.index}}">{{prob.name}}</a>
+    </p>
+</div>
+
+{% endfor %}
+
+{% endblock %}

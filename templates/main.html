@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    {% block content %}
+
+    {% if request.user.is_authenticated %}
+    {% if handel == '--1' %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <label for="">add CodeForcesId</label>
+        <input type="text" name="new_handel">
+        <input type="submit" value="Login" />
+    </form>
+    {% else %}
+    <h2>welcome try out lockouts</h2>
+    <p>your forces handel {{handel}}</p>
+    <a href="/lockout/" >quick Lockout</a>
+    {% endif %}
+    {% else %}
+    <h2>WELCOME LOGIN TO CONTINUE</h2>
+    {% endif %}
+    {% endblock %}
+</body>
+</html>
