@@ -9,14 +9,145 @@
 <h3>
     Note:You can claim a problem only if your latest submission before claiming on Codeforces is of that problem. 
 </h3>
-
+{% if stat == "Running" %}
+<div>
+    <h3>Time remaining</h3>
+    <div id="timer">
+    </div>
+</div>
+{% else %}
+<div>
+    <h3>FINISHED</h3>
+    {% if winner == "draw" %}
+    <p>RESULT : DRAW</p>
+    {% else %}
+    <p>RESULT : {{winner}} won the lockOut</p>
+    {% endif %}
+</div>
+{% endif %}
 {% for prob in selprobs %}
 <div>
     <p>
         <a target="_blank" rel="noopener" href="https://codeforces.com/problemset/problem/{{prob.contestId}}/{{prob.index}}">{{prob.name}}</a>
     </p>
+    <form action="" method="POST" >
+        {% csrf_token %}
+        {% if prob.claim == 'NONE' %}
+        <input type="number" value="{{prob.ind}}" name="probInd" hidden>
+        <input id="question{{prob.ind}}" type="submit" value="claim">
+        {% else %}
+        <p>claimed by {{prob.claim}}</p>
+        {% endif %}
+    </form>
 </div>
-
 {% endfor %}
+<textarea id="chat-log" cols="100" rows="20"></textarea><br>
+{{ ContestId|json_script:"ContestId" }}
+{{ k|json_script:"k" }}
+{{ stat|json_script:"stat" }}
+{{ Rtime|json_script:"Rtime" }}
+{{ usr|json_script:"usr" }}
+<script>
+    const ContestId = JSON.parse(document.getElementById('ContestId').textContent);
+    let t=JSON.parse(document.getElementById('k').textContent);
+    console.log(t)
+    let user=JSON.parse(document.getElementById('usr').textContent);
+    console.log(user)
+    const chatSocket = new WebSocket(
+    'ws://'
+    + window.location.host
+    + '/ws/chat/'
+    + ContestId
+    + '/'
+);
+console.log(typeof(t))
 
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log(data)
+        if(data.id!=0 && data.user!=user){
+            alert(data.message)
+            document.querySelector('#chat-log').value += (data.message + '\n');
+            if(data.id==11){
+                document.getElementById('question0').style.display = 'none';
+            }
+            else if(data.id==21){
+                document.getElementById('question1').style.display='none';
+            }
+            else if(data.id==31){
+                document.getElementById('question2').style.display='none';
+            }
+        }
+    };
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+    chatSocket.onopen = function(e){
+        if(t===11){
+            chatSocket.send(JSON.stringify({
+                'user':user,
+                'message': "opponent Claimed question 1 successfully",
+                'id':t,
+            }));
+        }
+        else if(t===21){
+            chatSocket.send(JSON.stringify({
+                'user':user,
+                'message': "opponent Claimed question 2 successfully",
+                'id':t,
+            }));
+        }
+        else if(t===31){
+            chatSocket.send(JSON.stringify({
+                'user':user,
+                'message': "opponent Claimed question 3 successfully",
+                'id':t,
+            }));
+        }
+        else{
+            chatSocket.send(JSON.stringify({
+                'user':user,
+                'message': "room started",
+                'id':0,
+            }));
+        }
+
+    }
+
+    let time = JSON.parse(document.getElementById('Rtime').textContent);
+    let stat= JSON.parse(document.getElementById('stat').textContent);
+    const timer = document.getElementById('timer');
+    
+    // if(stat!="end"){
+    //     var timeworker = new Worker("")
+    //     timeworker.postMessage()
+    //     timeworker.onmessage =function(e){
+    //         var Rtime=e.data
+    //         timer.innerHTML=Rtime;
+
+    //         if(Rtime==0){
+    //             clearInterval();
+    //             alert('Time is up!');
+    //             location.reload()
+    //         }
+    //     }
+    // }
+
+
+    
+    if(stat!="end"){
+        setInterval(() => {
+        time--;
+        timer.innerHTML = time;
+        if (time === 0) {
+        clearInterval();
+        alert('Time is up!');
+        location.reload()
+        }
+    }, 1000);
+    }
+
+
+</script>  
+ 
 {% endblock %}
